@@ -1,17 +1,51 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context=".MapFragment">
-
-    <!-- TODO: Update blank fragment layout -->
-
     <fragment
         android:id="@+id/mapFragment"
         android:name="com.google.android.gms.maps.SupportMapFragment"
         android:layout_width="match_parent"
-        android:layout_height="match_parent" />
+        android:layout_height="match_parent">
+    </fragment>
+
+    <LinearLayout
+        android:id="@+id/panel"
+        android:visibility="gone"
+        android:layout_width="match_parent"
+        android:layout_height="65dp"
+        android:layout_gravity="bottom"
+        android:layout_marginBottom="50dp"
+        android:background="@drawable/view_round_white_6"
+        android:orientation="horizontal"
+        android:padding="8dp">
+        <LinearLayout
+            android:layout_width="325dp"
+            android:layout_height="match_parent"
+            android:layout_marginLeft="15dp"
+            android:orientation="vertical">
+
+            <TextView
+                android:id="@+id/storeName"
+                android:layout_width="wrap_content"
+                android:layout_height="30dp"
+                android:text="storeName"
+                android:textSize="20dp"/>
+            <TextView
+                android:id="@+id/storeType"
+                android:layout_width="wrap_content"
+                android:layout_height="20dp"
+                android:text="type"
+                android:textSize="15dp"/>
+        </LinearLayout>
+        <Button
+            android:id="@+id/infBTN"
+            android:background="@drawable/baseline_arrow_forward_24"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"/>
+    </LinearLayout>
 
 
-</LinearLayout>
+</FrameLayout>

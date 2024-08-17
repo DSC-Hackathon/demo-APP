@@ -26,6 +26,8 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 
+import java.util.List;
+
 public class MapFragment extends Fragment implements OnMapReadyCallback, GoogleMap.OnMapClickListener {
     private GoogleMap googleMap;
     LinearLayout panel;
@@ -36,6 +38,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, GoogleM
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_map, container, false);
+
         initMap();
         panel = view.findViewById(R.id.panel);
         sName = view.findViewById(R.id.storeName);
@@ -49,12 +52,28 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, GoogleM
         if (mapFragment != null) {
             mapFragment.getMapAsync(this);
         }
+        ApiClient apiClient = new ApiClient();
+        apiClient.fetchSites(new ApiCallback<List<SiteData>>() {
+            @Override
+            public void onSuccess(List<SiteData> result) {
+                // GET 요청의 결과 처리
+                for (SiteData site : result) {
+                    LatLng latLng = new LatLng(site.getLatitude(),site.getLongitude());
+                    addMarkerWithStoreInfo(latLng,site.getName(),site.getTag(),site.getDescription());
+                }
+            }
+
+            @Override
+            public void onFailure(Throwable t) {
+                t.printStackTrace();
+            }
+        });
     }
 
     @Override
     public void onMapReady(GoogleMap googleMap) {
         this.googleMap = googleMap;
-        LatLng latLng = new LatLng(36.332165597, 127.434310227);
+        LatLng latLng = new LatLng(36.37003, 127.34594);
         googleMap.animateCamera(CameraUpdateFactory.newLatLngZoom(latLng, 18));
         googleMap.setOnMapClickListener(this);
     }
@@ -116,6 +135,16 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, GoogleM
             String storedescription = storeDescription.getText().toString();
 
             // 마커에 입력된 정보 추가
+            SiteData siteData = new SiteData(
+                    storeName,
+                    storeType,
+                    storedescription,
+                    latLng.latitude,
+                    latLng.longitude
+            );
+
+            ApiClient apiClient = new ApiClient();
+            apiClient.sendSiteData(siteData);
             addMarkerWithStoreInfo(latLng, storeName, storeType,storedescription);
 
             // 다이얼로그 닫기
@@ -137,20 +166,25 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, GoogleM
                 .title(storeName)
                 .snippet(storeType)
         );
+        marker.setTag(storeDescription);
         googleMap.setOnMarkerClickListener(new GoogleMap.OnMarkerClickListener() {
             @Override
             public boolean onMarkerClick(@NonNull Marker marker) {
                 panel.setVisibility(View.VISIBLE);
-                sName.setText(storeName);
-                sType.setText(storeType);
+                sName.setText(marker.getTitle());
+                sType.setText(marker.getSnippet());
+                String description = (String) marker.getTag();
+                LatLng latLng1 = marker.getPosition();
                 infB.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View view) {
                         StoreInfFragment storeInfFragment = new StoreInfFragment();
                         Bundle bundle = new Bundle();
-                        bundle.putString("key1", storeName);
-                        bundle.putString("key2", storeType);
-                        bundle.putString("key3", storeDescription);
+                        bundle.putString("key1", marker.getTitle());
+                        bundle.putString("key2", marker.getSnippet());
+                        bundle.putString("key3", description);
+                        bundle.putDouble("key4",latLng1.latitude );
+                        bundle.putDouble("key5", latLng1.longitude);
                         storeInfFragment.setArguments(bundle);
 
                         getFragmentManager().beginTransaction()
